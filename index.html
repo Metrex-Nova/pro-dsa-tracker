@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSA Task Tracker</title>
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ===== LOGIN SCREEN ===== */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-box h1 {
+            margin-bottom: 30px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 16px;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .login-box button:hover {
+            background: #ddd;
+        }
+
+        /* ===== MAIN APP CONTAINER ===== */
+        .app-container {
+            display: none;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .app-container.active {
+            display: block;
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .app-header h1 {
+            font-size: 24px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header-controls select {
+            padding: 8px 12px;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .header-controls select:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-logout:hover {
+            background: #444;
+        }
+
+        /* ===== ADD PROBLEM BUTTON ===== */
+        .add-problem-section {
+            margin-bottom: 20px;
+        }
+
+        .btn-add {
+            padding: 10px 20px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-add:hover {
+            background: #ddd;
+        }
+
+        /* ===== TABLE ===== */
+        .table-container {
+            overflow-x: auto;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #222;
+        }
+
+        th {
+            background: #000;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #1a1a1a;
+        }
+
+        /* ===== EDITABLE CELLS ===== */
+        .editable {
+            cursor: text;
+            padding: 8px;
+            border-radius: 3px;
+            min-height: 20px;
+        }
+
+        .editable:hover {
+            background: #222;
+        }
+
+        .editable.editing {
+            background: #000;
+            border: 1px solid #666;
+        }
+
+        .editable input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 14px;
+            padding: 0;
+        }
+
+        .editable input:focus {
+            outline: none;
+        }
+
+        /* ===== REVISION BUBBLES ===== */
+        .revision-bubbles {
+            display: flex;
+            gap: 6px;
+        }
+
+        .bubble {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #666;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .bubble.filled {
+            background: #fff;
+            border-color: #fff;
+        }
+
+        .bubble:hover {
+            border-color: #aaa;
+        }
+
+        /* ===== SOLUTIONS BUTTON ===== */
+        .btn-solutions {
+            padding: 6px 12px;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-solutions:hover {
+            background: #444;
+        }
+
+        .btn-solutions.has-solutions {
+            background: #1a4d1a;
+            border-color: #2d7a2d;
+        }
+
+        .btn-solutions.has-solutions:hover {
+            background: #246624;
+        }
+
+        /* ===== DELETE BUTTON ===== */
+        .btn-delete {
+            padding: 6px 12px;
+            background: #4a1a1a;
+            border: 1px solid #6a2a2a;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-delete:hover {
+            background: #662424;
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 900px;
+            margin: 40px auto;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .btn-close:hover {
+            background: #222;
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        /* ===== SOLUTION BLOCK ===== */
+        .solution-block {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .solution-block:last-child {
+            margin-bottom: 0;
+        }
+
+        .solution-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .solution-header h3 {
+            font-size: 16px;
+        }
+
+        .btn-remove-solution {
+            padding: 4px 12px;
+            background: #4a1a1a;
+            border: 1px solid #6a2a2a;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .btn-remove-solution:hover {
+            background: #662424;
+        }
+
+        .solution-field {
+            margin-bottom: 16px;
+        }
+
+        .solution-field label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #aaa;
+        }
+
+        .solution-field textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .solution-field textarea.code-area {
+            font-family: 'Courier New', monospace;
+            min-height: 200px;
+        }
+
+        .solution-field textarea:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        .solution-field input {
+            width: 100%;
+            padding: 10px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .solution-field input:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        /* ===== MODAL FOOTER ===== */
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .btn-add-solution {
+            padding: 10px 20px;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-add-solution:hover {
+            background: #444;
+        }
+
+        .btn-save-solutions {
+            padding: 10px 24px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-save-solutions:hover {
+            background: #ddd;
+        }
+
+        /* ===== LOADING INDICATOR ===== */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        /* ===== MOBILE RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .app-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .modal-content {
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .table-container {
+                border-radius: 0;
+            }
+
+            th, td {
+                padding: 8px;
+                font-size: 13px;
+            }
+
+            .login-box {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div class="login-container" id="loginScreen">
+        <div class="login-box">
+            <h1>DSA Task Tracker</h1>
+            <input type="text" id="uidInput" placeholder="Enter User ID" autocomplete="off">
+            <input type="password" id="passwordInput" placeholder="Enter Password" autocomplete="off">
+            <button onclick="app.login()">Login</button>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div class="app-container" id="appContainer">
+        <!-- HEADER -->
+        <div class="app-header">
+            <h1>DSA Task Tracker</h1>
+            <div class="header-controls">
+                <select id="yearSelect" onchange="app.changeYear()"></select>
+                <select id="monthSelect" onchange="app.changeMonth()"></select>
+                <button class="btn-logout" onclick="app.logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- ADD PROBLEM BUTTON -->
+        <div class="add-problem-section">
+            <button class="btn-add" onclick="app.addProblem()">+ Add Problem</button>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">S.No.</th>
+                        <th style="width: 25%;">Title</th>
+                        <th style="width: 20%;">GitHub Link</th>
+                        <th style="width: 15%;">Type</th>
+                        <th style="width: 15%;">Platform</th>
+                        <th style="width: 140px;">Revision</th>
+                        <th style="width: 100px;">Solutions</th>
+                        <th style="width: 80px;">Delete</th>
+                    </tr>
+                </thead>
+                <tbody id="problemTableBody">
+                    <!-- Problems will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SOLUTIONS MODAL -->
+    <div class="modal" id="solutionsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Solutions</h2>
+                <button class="btn-close" onclick="app.closeSolutionsModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="solutionsContainer">
+                <!-- Solutions will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-add-solution" onclick="app.addSolutionBlock()">+ Add Solution</button>
+                <button class="btn-save-solutions" onclick="app.saveSolutions()">Save All Solutions</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // ===== FIREBASE CONFIGURATION =====
+        // Replace with your Firebase project config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBcvmfQr49-CUO1DVq1y91jyYZbgEZOD4E",
+            authDomain: "pro-dsa-tracker.firebaseapp.com",
+            projectId: "pro-dsa-tracker",
+            storageBucket: "pro-dsa-tracker.firebasestorage.app",
+            messagingSenderId: "777367986934",
+            appId: "1:777367986934:web:1d08ee8bbd66d12a6782d7",
+            measurementId: "G-KJ2RBR7ESV"
+        };
+
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ===== APPLICATION STATE =====
+        const app = {
+            // Current user session
+            userKey: null,
+            selectedYear: null,
+            selectedMonth: null,
+
+            // Current problem being edited in solutions modal
+            currentProblemId: null,
+
+            // Cache of current month's problems
+            problems: [],
+
+            // ===== AUTHENTICATION & INITIALIZATION =====
+
+            /**
+             * Derive a stable document key from UID + password
+             * Using simple hash for namespace isolation
+             */
+            deriveUserKey(uid, password) {
+                const combined = `${uid}:${password}`;
+                let hash = 0;
+                for (let i = 0; i < combined.length; i++) {
+                    const char = combined.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash; // Convert to 32-bit integer
+                }
+                // Return positive hash as string
+                return Math.abs(hash).toString(36);
+            },
+
+            /**
+             * Login handler - fake auth using namespace derivation
+             */
+            async login() {
+                const uid = document.getElementById('uidInput').value.trim();
+                const password = document.getElementById('passwordInput').value.trim();
+
+                if (!uid || !password) {
+                    alert('Please enter both User ID and Password');
+                    return;
+                }
+
+                // Derive user key
+                this.userKey = this.deriveUserKey(uid, password);
+
+                // Set default year/month to current date
+                const now = new Date();
+                this.selectedYear = now.getFullYear();
+                this.selectedMonth = now.getMonth(); // 0-indexed
+
+                // Save session to localStorage
+                localStorage.setItem('dsa_userKey', this.userKey);
+                localStorage.setItem('dsa_selectedYear', this.selectedYear);
+                localStorage.setItem('dsa_selectedMonth', this.selectedMonth);
+
+                // Initialize UI
+                this.initializeApp();
+            },
+
+            /**
+             * Logout handler
+             */
+            logout() {
+                localStorage.removeItem('dsa_userKey');
+                localStorage.removeItem('dsa_selectedYear');
+                localStorage.removeItem('dsa_selectedMonth');
+                
+                this.userKey = null;
+                this.selectedYear = null;
+                this.selectedMonth = null;
+                this.problems = [];
+
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('appContainer').classList.remove('active');
+            },
+
+            /**
+             * Check for existing session on page load
+             */
+            async checkSession() {
+                const userKey = localStorage.getItem('dsa_userKey');
+                const year = localStorage.getItem('dsa_selectedYear');
+                const month = localStorage.getItem('dsa_selectedMonth');
+
+                if (userKey && year && month) {
+                    this.userKey = userKey;
+                    this.selectedYear = parseInt(year);
+                    this.selectedMonth = parseInt(month);
+                    this.initializeApp();
+                }
+            },
+
+            /**
+             * Initialize app UI after login
+             */
+            async initializeApp() {
+                // Hide login, show app
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appContainer').classList.add('active');
+
+                // Populate year/month dropdowns
+                this.populateYearSelect();
+                this.populateMonthSelect();
+
+                // Load problems for current year/month
+                await this.loadProblems();
+            },
+
+            /**
+             * Populate year selector (2020-2035)
+             */
+            populateYearSelect() {
+                const select = document.getElementById('yearSelect');
+                select.innerHTML = '';
+                
+                for (let year = 2020; year <= 2035; year++) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    if (year === this.selectedYear) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                }
+            },
+
+            /**
+             * Populate month selector
+             */
+            populateMonthSelect() {
+                const months = [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ];
+                
+                const select = document.getElementById('monthSelect');
+                select.innerHTML = '';
+                
+                months.forEach((month, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = month;
+                    if (index === this.selectedMonth) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+            },
+
+            /**
+             * Year change handler
+             */
+            async changeYear() {
+                const newYear = parseInt(document.getElementById('yearSelect').value);
+                this.selectedYear = newYear;
+                localStorage.setItem('dsa_selectedYear', newYear);
+                await this.loadProblems();
+            },
+
+            /**
+             * Month change handler
+             */
+            async changeMonth() {
+                const newMonth = parseInt(document.getElementById('monthSelect').value);
+                this.selectedMonth = newMonth;
+                localStorage.setItem('dsa_selectedMonth', newMonth);
+                await this.loadProblems();
+            },
+
+            // ===== FIRESTORE OPERATIONS =====
+
+            /**
+             * Get Firestore document reference for current year/month
+             */
+            getDocRef() {
+                return db.collection('users')
+                    .doc(this.userKey)
+                    .collection('years')
+                    .doc(this.selectedYear.toString())
+                    .collection('months')
+                    .doc(this.selectedMonth.toString());
+            },
+
+            /**
+             * Load problems from Firestore
+             * Defensive: handle missing document, missing fields
+             */
+            async loadProblems() {
+                try {
+                    const docRef = this.getDocRef();
+                    const doc = await docRef.get();
+
+                    if (doc.exists) {
+                        const data = doc.data();
+                        // Defensive: ensure problems array exists
+                        this.problems = Array.isArray(data.problems) ? data.problems : [];
+                    } else {
+                        // Document doesn't exist yet - initialize empty
+                        this.problems = [];
+                    }
+
+                    this.renderProblems();
+                } catch (error) {
+                    console.error('Error loading problems:', error);
+                    alert('Failed to load problems. Please check your Firebase configuration.');
+                    this.problems = [];
+                    this.renderProblems();
+                }
+            },
+
+            /**
+             * Save problems to Firestore
+             * Defensive: create document if it doesn't exist
+             */
+            async saveProblems() {
+                try {
+                    const docRef = this.getDocRef();
+                    await docRef.set({
+                        problems: this.problems,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true }); // merge: true to avoid overwriting other fields
+                } catch (error) {
+                    console.error('Error saving problems:', error);
+                    alert('Failed to save. Please try again.');
+                }
+            },
+
+            // ===== PROBLEM MANAGEMENT =====
+
+            /**
+             * Add a new problem
+             */
+            async addProblem() {
+                const newProblem = {
+                    id: this.generateId(),
+                    title: '',
+                    githubLink: '',
+                    type: '',
+                    platform: '',
+                    revision: 0,
+                    solutions: [] // Array of solution objects
+                };
+
+                this.problems.push(newProblem);
+                await this.saveProblems();
+                this.renderProblems();
+            },
+
+            /**
+             * Delete a problem
+             */
+            async deleteProblem(problemId) {
+                if (!confirm('Are you sure you want to delete this problem?')) {
+                    return;
+                }
+
+                this.problems = this.problems.filter(p => p.id !== problemId);
+                await this.saveProblems();
+                this.renderProblems();
+            },
+
+            /**
+             * Update a problem field
+             */
+            async updateProblem(problemId, field, value) {
+                const problem = this.problems.find(p => p.id === problemId);
+                if (problem) {
+                    problem[field] = value;
+                    await this.saveProblems();
+                }
+            },
+
+            /**
+             * Set revision count for a problem
+             */
+            async setRevision(problemId, count) {
+                const problem = this.problems.find(p => p.id === problemId);
+                if (problem) {
+                    // Toggle behavior: if clicking the same filled bubble, decrease
+                    if (problem.revision === count) {
+                        problem.revision = count - 1;
+                    } else {
+                        problem.revision = count;
+                    }
+                    await this.saveProblems();
+                    this.renderProblems();
+                }
+            },
+
+            /**
+             * Generate unique ID for problems
+             */
+            generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            },
+
+            // ===== RENDERING =====
+
+            /**
+             * Render all problems to table
+             */
+            renderProblems() {
+                const tbody = document.getElementById('problemTableBody');
+                tbody.innerHTML = '';
+
+                if (this.problems.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <h3>No problems yet</h3>
+                                    <p>Click "Add Problem" to get started</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                this.problems.forEach((problem, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>
+                            <div class="editable" data-id="${problem.id}" data-field="title">
+                                ${this.escapeHtml(problem.title || '')}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="editable" data-id="${problem.id}" data-field="githubLink">
+                                ${this.escapeHtml(problem.githubLink || '')}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="editable" data-id="${problem.id}" data-field="type">
+                                ${this.escapeHtml(problem.type || '')}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="editable" data-id="${problem.id}" data-field="platform">
+                                ${this.escapeHtml(problem.platform || '')}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="revision-bubbles">
+                                ${this.renderRevisionBubbles(problem.id, problem.revision || 0)}
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn-solutions ${problem.solutions && problem.solutions.length > 0 ? 'has-solutions' : ''}" 
+                                    onclick="app.openSolutionsModal('${problem.id}')">
+                                Solutions ${problem.solutions && problem.solutions.length > 0 ? `(${problem.solutions.length})` : ''}
+                            </button>
+                        </td>
+                        <td>
+                            <button class="btn-delete" onclick="app.deleteProblem('${problem.id}')">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                // Attach editable cell listeners
+                this.attachEditableListeners();
+            },
+
+            /**
+             * Render revision bubbles (1-5)
+             */
+            renderRevisionBubbles(problemId, currentRevision) {
+                let html = '';
+                for (let i = 1; i <= 5; i++) {
+                    const filled = i <= currentRevision ? 'filled' : '';
+                    html += `<div class="bubble ${filled}" onclick="app.setRevision('${problemId}', ${i})"></div>`;
+                }
+                return html;
+            },
+
+            /**
+             * Escape HTML to prevent XSS
+             */
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            },
+
+            // ===== EDITABLE CELLS =====
+
+            /**
+             * Attach click listeners to editable cells
+             */
+            attachEditableListeners() {
+                document.querySelectorAll('.editable').forEach(cell => {
+                    cell.addEventListener('click', (e) => {
+                        if (!cell.classList.contains('editing')) {
+                            this.makeEditable(cell);
+                        }
+                    });
+                });
+            },
+
+            /**
+             * Make a cell editable
+             */
+            makeEditable(cell) {
+                const currentValue = cell.textContent.trim();
+                const problemId = cell.dataset.id;
+                const field = cell.dataset.field;
+
+                cell.classList.add('editing');
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentValue;
+                
+                cell.textContent = '';
+                cell.appendChild(input);
+                input.focus();
+                input.select();
+
+                // Save on Enter
+                input.addEventListener('keydown', async (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const newValue = input.value.trim();
+                        await this.updateProblem(problemId, field, newValue);
+                        this.renderProblems();
+                    } else if (e.key === 'Escape') {
+                        this.renderProblems();
+                    }
+                });
+
+                // Save on blur
+                input.addEventListener('blur', async () => {
+                    const newValue = input.value.trim();
+                    await this.updateProblem(problemId, field, newValue);
+                    this.renderProblems();
+                });
+            },
+
+            // ===== SOLUTIONS MODAL =====
+
+            /**
+             * Open solutions modal for a problem
+             */
+            openSolutionsModal(problemId) {
+                const problem = this.problems.find(p => p.id === problemId);
+                if (!problem) return;
+
+                this.currentProblemId = problemId;
+
+                // Defensive: ensure solutions array exists
+                if (!Array.isArray(problem.solutions)) {
+                    problem.solutions = [];
+                }
+
+                // If no solutions exist, add one empty solution
+                if (problem.solutions.length === 0) {
+                    problem.solutions.push(this.createEmptySolution());
+                }
+
+                // Update modal title
+                document.getElementById('modalTitle').textContent = 
+                    `Solutions - ${problem.title || 'Untitled Problem'}`;
+
+                // Render solutions
+                this.renderSolutions(problem.solutions);
+
+                // Show modal
+                document.getElementById('solutionsModal').classList.add('active');
+            },
+
+            /**
+             * Close solutions modal
+             */
+            closeSolutionsModal() {
+                document.getElementById('solutionsModal').classList.remove('active');
+                this.currentProblemId = null;
+            },
+
+            /**
+             * Create empty solution object
+             */
+            createEmptySolution() {
+                return {
+                    id: this.generateId(),
+                    explanation: '',
+                    code: '',
+                    timeComplexity: '',
+                    spaceComplexity: ''
+                };
+            },
+
+            /**
+             * Render solutions in modal
+             */
+            renderSolutions(solutions) {
+                const container = document.getElementById('solutionsContainer');
+                container.innerHTML = '';
+
+                solutions.forEach((solution, index) => {
+                    const block = document.createElement('div');
+                    block.className = 'solution-block';
+                    block.innerHTML = `
+                        <div class="solution-header">
+                            <h3>Solution ${index + 1}</h3>
+                            ${solutions.length > 1 ? 
+                                `<button class="btn-remove-solution" onclick="app.removeSolution('${solution.id}')">Remove</button>` 
+                                : ''}
+                        </div>
+                        
+                        <div class="solution-field">
+                            <label>Explanation</label>
+                            <textarea data-solution-id="${solution.id}" data-field="explanation">${this.escapeHtml(solution.explanation || '')}</textarea>
+                        </div>
+
+                        <div class="solution-field">
+                            <label>Code</label>
+                            <textarea class="code-area" data-solution-id="${solution.id}" data-field="code">${this.escapeHtml(solution.code || '')}</textarea>
+                        </div>
+
+                        <div class="solution-field">
+                            <label>Time Complexity</label>
+                            <input type="text" data-solution-id="${solution.id}" data-field="timeComplexity" value="${this.escapeHtml(solution.timeComplexity || '')}">
+                        </div>
+
+                        <div class="solution-field">
+                            <label>Space Complexity</label>
+                            <input type="text" data-solution-id="${solution.id}" data-field="spaceComplexity" value="${this.escapeHtml(solution.spaceComplexity || '')}">
+                        </div>
+                    `;
+                    container.appendChild(block);
+                });
+            },
+
+            /**
+             * Add new solution block
+             */
+            addSolutionBlock() {
+                const problem = this.problems.find(p => p.id === this.currentProblemId);
+                if (!problem) return;
+
+                // Defensive: ensure solutions array exists
+                if (!Array.isArray(problem.solutions)) {
+                    problem.solutions = [];
+                }
+
+                problem.solutions.push(this.createEmptySolution());
+                this.renderSolutions(problem.solutions);
+            },
+
+            /**
+             * Remove a solution
+             */
+            removeSolution(solutionId) {
+                const problem = this.problems.find(p => p.id === this.currentProblemId);
+                if (!problem) return;
+
+                problem.solutions = problem.solutions.filter(s => s.id !== solutionId);
+                
+                // Ensure at least one solution remains
+                if (problem.solutions.length === 0) {
+                    problem.solutions.push(this.createEmptySolution());
+                }
+
+                this.renderSolutions(problem.solutions);
+            },
+
+            /**
+             * Save all solutions
+             */
+            async saveSolutions() {
+                const problem = this.problems.find(p => p.id === this.currentProblemId);
+                if (!problem) return;
+
+                // Collect data from all inputs/textareas
+                const container = document.getElementById('solutionsContainer');
+                const inputs = container.querySelectorAll('textarea, input');
+
+                inputs.forEach(input => {
+                    const solutionId = input.dataset.solutionId;
+                    const field = input.dataset.field;
+                    const value = input.value;
+
+                    const solution = problem.solutions.find(s => s.id === solutionId);
+                    if (solution) {
+                        solution[field] = value;
+                    }
+                });
+
+                await this.saveProblems();
+                this.closeSolutionsModal();
+                this.renderProblems(); // Update button state
+            }
+        };
+
+        // ===== PAGE LOAD =====
+        window.addEventListener('DOMContentLoaded', () => {
+            app.checkSession();
+        });
+
+        // ===== KEYBOARD SHORTCUTS =====
+        window.addEventListener('keydown', (e) => {
+            // Close modal on Escape
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('solutionsModal');
+                if (modal.classList.contains('active')) {
+                    app.closeSolutionsModal();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
