@@ -5,1239 +5,1448 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DSA Task Tracker</title>
     <style>
-        /* ===== RESET & BASE ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #050505;
+            --surface: #0d0d0d;
+            --surface2: #141414;
+            --border: #1e1e1e;
+            --border2: #2a2a2a;
+            --text: #e8e8e8;
+            --text-muted: #555;
+            --text-dim: #888;
+            --accent: #c8ff00;
+            --accent-dim: rgba(200, 255, 0, 0.08);
+            --accent-border: rgba(200, 255, 0, 0.25);
+            --blue: #4a9eff;
+            --blue-dim: rgba(74, 158, 255, 0.08);
+            --blue-border: rgba(74, 158, 255, 0.25);
+            --red: #ff5a5a;
+            --red-dim: rgba(255, 90, 90, 0.08);
+            --red-border: rgba(255, 90, 90, 0.2);
+            --green: #4ade80;
+            --green-dim: rgba(74, 222, 128, 0.08);
+            --font-ui: 'Syne', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #000;
-            color: #fff;
-            line-height: 1.6;
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
+            line-height: 1.5;
         }
 
-        /* ===== LOGIN SCREEN ===== */
-        .login-container {
+        /* ─── LOGIN ─── */
+        .login-wrap {
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             padding: 20px;
+            background:
+                radial-gradient(ellipse 60% 40% at 50% -10%, rgba(200,255,0,0.07) 0%, transparent 60%),
+                var(--bg);
         }
 
         .login-box {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 40px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            padding: 44px 40px;
             width: 100%;
-            max-width: 400px;
+            max-width: 380px;
         }
 
-        .login-box h1 {
-            margin-bottom: 30px;
-            font-size: 24px;
-            text-align: center;
+        .login-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 32px;
+        }
+
+        .login-logo-mark {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #000;
+            font-weight: 700;
+        }
+
+        .login-logo h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: -0.3px;
+        }
+
+        .field-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
         }
 
         .login-box input {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 16px;
-            background: #000;
-            border: 1px solid #333;
-            border-radius: 4px;
-            color: #fff;
+            padding: 11px 14px;
+            margin-bottom: 14px;
+            background: var(--bg);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text);
             font-size: 14px;
+            font-family: var(--font-ui);
+            transition: border-color 0.15s;
         }
 
         .login-box input:focus {
             outline: none;
-            border-color: #666;
+            border-color: var(--accent);
         }
 
-        .login-box button {
+        .btn-login {
             width: 100%;
             padding: 12px;
-            background: #fff;
+            background: var(--accent);
             color: #000;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
+            font-family: var(--font-ui);
             cursor: pointer;
+            letter-spacing: 0.3px;
+            transition: opacity 0.15s;
+            margin-top: 4px;
         }
 
-        .login-box button:hover {
-            background: #ddd;
-        }
+        .btn-login:hover { opacity: 0.88; }
 
-        /* ===== MAIN APP CONTAINER ===== */
-        .app-container {
-            display: none;
-            padding: 20px;
-            max-width: 1400px;
+        /* ─── APP ─── */
+        .app-wrap { display: none; min-height: 100vh; }
+        .app-wrap.active { display: block; }
+
+        .app-inner {
+            max-width: 1100px;
             margin: 0 auto;
+            padding: 24px 24px 60px;
         }
 
-        .app-container.active {
-            display: block;
-        }
-
-        /* ===== HEADER ===== */
-        .app-header {
+        /* ─── TOPBAR ─── */
+        .topbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 16px;
+            margin-bottom: 28px;
         }
 
-        .app-header h1 {
-            font-size: 24px;
-        }
-
-        .header-controls {
+        .topbar-logo {
             display: flex;
-            gap: 12px;
             align-items: center;
-            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        .header-controls select {
-            padding: 8px 12px;
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 4px;
-            color: #fff;
+        .topbar-logo-mark {
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 14px;
-            cursor: pointer;
+            color: #000;
+            font-weight: 700;
         }
 
-        .header-controls select:focus {
-            outline: none;
-            border-color: #666;
+        .topbar-logo span {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
         }
 
         .btn-logout {
-            padding: 8px 16px;
-            background: #333;
-            border: 1px solid #555;
-            border-radius: 4px;
-            color: #fff;
-            font-size: 14px;
+            padding: 7px 14px;
+            background: transparent;
+            border: 1px solid var(--border2);
+            border-radius: 5px;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-family: var(--font-ui);
             cursor: pointer;
+            transition: all 0.15s;
         }
 
         .btn-logout:hover {
-            background: #444;
+            border-color: var(--red-border);
+            color: var(--red);
+            background: var(--red-dim);
         }
 
-        /* ===== ADD PROBLEM BUTTON ===== */
-        .add-problem-section {
-            margin-bottom: 20px;
+        /* ─── DATE NAV ─── */
+        .date-nav-wrap {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
         }
 
-        .btn-add {
-            padding: 10px 20px;
-            background: #fff;
-            color: #000;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 600;
+        .btn-daynav {
+            width: 36px;
+            height: 36px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text-dim);
+            font-size: 18px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            font-family: var(--font-ui);
         }
 
-        .btn-add:hover {
-            background: #ddd;
+        .btn-daynav:hover {
+            background: var(--border2);
+            color: var(--text);
         }
 
-        /* ===== TABLE ===== */
-        .table-container {
-            overflow-x: auto;
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 8px;
+        .date-center {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .date-primary {
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .date-pills {
+            display: flex;
+            gap: 8px;
+        }
+
+        .date-pill {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .pill-day {
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-border);
+            color: var(--accent);
+        }
+
+        .pill-qs {
+            background: var(--blue-dim);
+            border: 1px solid var(--blue-border);
+            color: var(--blue);
+            font-family: var(--font-mono);
+            font-size: 10px;
+        }
+
+        .date-input-wrap {
+            display: flex;
+            align-items: center;
+        }
+
+        .date-picker {
+            padding: 7px 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text-dim);
+            font-size: 12px;
+            font-family: var(--font-ui);
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+
+        .date-picker:focus { outline: none; border-color: var(--accent); }
+        .date-picker::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
+
+        /* ─── PROGRESS ROW ─── */
+        .progress-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .progress-dot {
+            flex: 1;
+            height: 4px;
+            background: var(--surface2);
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.2s;
+        }
+
+        .progress-dot.done {
+            background: var(--accent);
+        }
+
+        .progress-dot.partial {
+            background: linear-gradient(90deg, var(--accent) 50%, var(--surface2) 50%);
+        }
+
+        /* ─── TABLE ─── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #222;
         }
 
         th {
-            background: #000;
-            font-weight: 600;
-            font-size: 13px;
+            padding: 11px 16px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
         }
 
-        tr:last-child td {
-            border-bottom: none;
+        td {
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
         }
 
-        tr:hover {
-            background: #1a1a1a;
+        tr:last-child td { border-bottom: none; }
+
+        tr:hover td { background: rgba(255,255,255,0.015); }
+
+        /* Q number cell */
+        .q-cell {
+            text-align: center;
         }
 
-        /* ===== EDITABLE CELLS ===== */
-        .editable {
+        .q-global {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .q-local {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        /* Editable title */
+        .editable-cell {
+            min-width: 200px;
+            padding: 7px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            color: var(--text);
+            background: transparent;
             cursor: text;
-            padding: 8px;
-            border-radius: 3px;
-            min-height: 20px;
-            background: #4b4949;
+            transition: background 0.15s;
+            min-height: 34px;
+            display: flex;
+            align-items: center;
         }
 
-        .editable:hover {
-            background: #222;
-        }
+        .editable-cell:hover { background: var(--surface2); }
+        .editable-cell.editing { background: var(--bg); outline: 1px solid var(--border2); }
 
-        .editable.editing {
-            background: #000;
-            border: 1px solid #666;
-        }
-
-        .editable input {
-            width: 100%;
+        .editable-cell input {
             background: transparent;
             border: none;
-            color: #fff;
+            color: var(--text);
             font-size: 14px;
-            padding: 0;
+            font-family: var(--font-ui);
+            width: 100%;
         }
 
-        .editable input:focus {
-            outline: none;
-        }
+        .editable-cell input:focus { outline: none; }
 
-        /* ===== REVISION BUBBLES ===== */
-        .revision-bubbles {
-            display: flex;
-            gap: 6px;
-        }
-
-        .bubble {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #666;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .bubble.filled {
-            background: #fff;
-            border-color: #fff;
-        }
-
-        .bubble:hover {
-            border-color: #aaa;
-        }
-
-        /* ===== SOLUTIONS BUTTON ===== */
-        .btn-solutions {
-            padding: 6px 12px;
-            background: #333;
-            border: 1px solid #555;
-            border-radius: 4px;
-            color: #fff;
+        .title-placeholder {
+            color: var(--text-muted);
             font-size: 13px;
+        }
+
+        /* Links cell */
+        .links-cell {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .link-chip {
+            padding: 3px 9px;
+            background: var(--blue-dim);
+            border: 1px solid var(--blue-border);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--blue);
+            text-decoration: none;
             cursor: pointer;
+            transition: all 0.12s;
             white-space: nowrap;
         }
 
+        .link-chip:hover {
+            background: rgba(74, 158, 255, 0.15);
+            color: #6fb3ff;
+        }
+
+        .btn-add-link {
+            padding: 3px 9px;
+            background: transparent;
+            border: 1px dashed var(--border2);
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: var(--font-ui);
+            transition: all 0.12s;
+        }
+
+        .btn-add-link:hover {
+            border-color: var(--blue-border);
+            color: var(--blue);
+            background: var(--blue-dim);
+        }
+
+        /* Revision bubbles */
+        .bubbles {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .bubble {
+            width: 16px;
+            height: 16px;
+            border: 1.5px solid var(--border2);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+
+        .bubble.on {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .bubble:hover { border-color: var(--text-dim); }
+        .bubble.on:hover { opacity: 0.8; }
+
+        /* Solutions button */
+        .btn-solutions {
+            padding: 6px 14px;
+            background: transparent;
+            border: 1px solid var(--border2);
+            border-radius: 5px;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-family: var(--font-ui);
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+
         .btn-solutions:hover {
-            background: #444;
+            border-color: rgba(200,255,0,0.3);
+            color: var(--accent);
+            background: var(--accent-dim);
         }
 
         .btn-solutions.has-solutions {
-            background: #1a4d1a;
-            border-color: #2d7a2d;
+            border-color: var(--accent-border);
+            color: var(--accent);
+            background: var(--accent-dim);
         }
 
-        .btn-solutions.has-solutions:hover {
-            background: #246624;
-        }
-
-        /* ===== DELETE BUTTON ===== */
-        .btn-delete {
-            padding: 6px 12px;
-            background: #4a1a1a;
-            border: 1px solid #6a2a2a;
-            border-radius: 4px;
-            color: #fff;
-            font-size: 13px;
-            cursor: pointer;
-        }
-
-        .btn-delete:hover {
-            background: #662424;
-        }
-
-        /* ===== MODAL ===== */
-        .modal {
+        /* ─── MODALS BASE ─── */
+        .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            overflow-y: auto;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 900;
+            backdrop-filter: blur(4px);
             padding: 20px;
         }
 
-        .modal.active {
+        .modal-overlay.open {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: center;
         }
 
-        .modal-content {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 8px;
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
             width: 100%;
-            max-width: 900px;
-            margin: 40px auto;
             position: relative;
+            animation: modalIn 0.15s ease-out;
         }
 
-        .modal-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid #333;
+        @keyframes modalIn {
+            from { transform: translateY(8px) scale(0.98); opacity: 0; }
+            to { transform: none; opacity: 1; }
+        }
+
+        .modal-head {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .modal-header h2 {
-            font-size: 20px;
+        .modal-head h2 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dim);
+        }
+
+        .modal-head h2 strong {
+            color: var(--text);
+            font-weight: 600;
         }
 
         .btn-close {
-            background: none;
+            width: 28px;
+            height: 28px;
+            background: transparent;
             border: none;
-            color: #fff;
-            font-size: 24px;
+            color: var(--text-muted);
+            font-size: 20px;
             cursor: pointer;
-            padding: 0;
-            width: 32px;
-            height: 32px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 4px;
+            font-family: var(--font-ui);
+            transition: all 0.12s;
         }
 
-        .btn-close:hover {
-            background: #222;
-        }
+        .btn-close:hover { background: var(--surface2); color: var(--text); }
 
-        .modal-body {
-            padding: 24px;
-            max-height: calc(100vh - 200px);
-            overflow-y: auto;
-        }
-
-        /* ===== SOLUTION BLOCK ===== */
-        .solution-block {
-            background: #000;
-            border: 1px solid #333;
-            border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .solution-block:last-child {
-            margin-bottom: 0;
-        }
-
-        .solution-header {
+        /* ─── SOLUTIONS MODAL ─── */
+        #solModal .modal-box {
+            max-width: 1050px;
+            height: 86vh;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
+            flex-direction: column;
         }
 
-        .solution-header h3 {
-            font-size: 16px;
+        /* Tabs row */
+        .sol-tabs {
+            display: flex;
+            align-items: stretch;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            padding: 0 20px;
+            gap: 2px;
+            flex-shrink: 0;
         }
 
-        .btn-remove-solution {
-            padding: 4px 12px;
-            background: #4a1a1a;
-            border: 1px solid #6a2a2a;
-            border-radius: 4px;
-            color: #fff;
+        .sol-tab {
+            padding: 10px 16px;
             font-size: 12px;
-            cursor: pointer;
-        }
-
-        .btn-remove-solution:hover {
-            background: #662424;
-        }
-
-        .solution-field {
-            margin-bottom: 16px;
-        }
-
-        .solution-field label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 13px;
             font-weight: 600;
-            color: #aaa;
+            font-family: var(--font-ui);
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.12s;
+            letter-spacing: 0.2px;
         }
 
-        .solution-field textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 12px;
-            background: #0a0a0a;
-            border: 1px solid #333;
-            border-radius: 4px;
-            color: #fff;
-            font-size: 14px;
-            font-family: inherit;
-            resize: vertical;
+        .sol-tab:hover { color: var(--text-dim); }
+        .sol-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+        .sol-tab-add {
+            padding: 10px 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: color 0.12s;
         }
 
-        .solution-field textarea.code-area {
-            font-family: 'Courier New', monospace;
-            min-height: 200px;
-        }
+        .sol-tab-add:hover { color: var(--accent); }
 
-        .solution-field textarea:focus {
-            outline: none;
-            border-color: #666;
-        }
-
-        .solution-field input {
-            width: 100%;
-            padding: 10px;
-            background: #0a0a0a;
-            border: 1px solid #333;
-            border-radius: 4px;
-            color: #fff;
-            font-size: 14px;
-        }
-
-        .solution-field input:focus {
-            outline: none;
-            border-color: #666;
-        }
-
-        /* ===== MODAL FOOTER ===== */
-        .modal-footer {
-            padding: 16px 24px;
-            border-top: 1px solid #333;
+        /* Solution body */
+        .sol-body {
+            flex: 1;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 16px 20px;
+            min-height: 0;
+        }
+
+        .sol-panel {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
             gap: 12px;
         }
 
-        .btn-add-solution {
-            padding: 10px 20px;
-            background: #333;
-            border: 1px solid #555;
-            border-radius: 4px;
-            color: #fff;
-            font-size: 14px;
-            cursor: pointer;
+        .sol-panel.active { display: flex; }
+
+        /* Two-column grid: explanation | code */
+        .sol-grid {
+            display: grid;
+            grid-template-columns: 2fr 3fr;
+            gap: 12px;
+            flex: 1;
+            min-height: 0;
         }
 
-        .btn-add-solution:hover {
-            background: #444;
+        .sol-col {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            gap: 6px;
         }
 
-        .btn-save-solutions {
-            padding: 10px 24px;
-            background: #fff;
-            color: #000;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
+        .sol-col-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .sol-col textarea {
+            flex: 1;
+            min-height: 0;
+            padding: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: var(--font-ui);
+            resize: none;
+            line-height: 1.6;
+            transition: border-color 0.15s;
+        }
+
+        .sol-col textarea.is-code {
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            line-height: 1.65;
+        }
+
+        .sol-col textarea:focus {
+            outline: none;
+            border-color: var(--border2);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+        }
+
+        /* TC / SC row */
+        .sol-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .sol-meta-field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .sol-meta-field label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+        }
+
+        .sol-meta-field input {
+            padding: 8px 11px;
+            background: var(--bg);
+            border: 1px solid var(--border2);
+            border-radius: 5px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: var(--font-mono);
+            transition: border-color 0.15s;
+        }
+
+        .sol-meta-field input:focus { outline: none; border-color: var(--border2); }
+
+        /* Solutions footer */
+        .sol-foot {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .btn-remove-sol {
+            padding: 7px 14px;
+            background: var(--red-dim);
+            border: 1px solid var(--red-border);
+            border-radius: 5px;
+            color: var(--red);
+            font-size: 12px;
+            font-family: var(--font-ui);
             font-weight: 600;
             cursor: pointer;
+            transition: opacity 0.15s;
         }
 
-        .btn-save-solutions:hover {
-            background: #ddd;
+        .btn-remove-sol:hover { opacity: 0.8; }
+        .btn-remove-sol:disabled { opacity: 0.3; pointer-events: none; }
+
+        .btn-save {
+            padding: 8px 22px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: var(--font-ui);
+            cursor: pointer;
+            transition: opacity 0.15s;
         }
 
-        /* ===== LOADING INDICATOR ===== */
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
+        .btn-save:hover { opacity: 0.88; }
+
+        /* ─── LINKS MODAL ─── */
+        #linksModal .modal-box {
+            max-width: 460px;
         }
 
-        /* ===== EMPTY STATE ===== */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
+        .links-body {
+            padding: 16px 20px;
+            max-height: 50vh;
+            overflow-y: auto;
         }
 
-        .empty-state h3 {
-            font-size: 18px;
+        .links-empty {
+            font-size: 13px;
+            color: var(--text-muted);
+            padding: 12px 0;
+        }
+
+        .link-row {
+            display: flex;
+            gap: 8px;
             margin-bottom: 8px;
+            align-items: center;
         }
 
-        /* ===== MOBILE RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .app-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+        .link-row input {
+            padding: 8px 10px;
+            background: var(--bg);
+            border: 1px solid var(--border2);
+            border-radius: 5px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: var(--font-ui);
+            transition: border-color 0.15s;
+        }
 
-            .header-controls {
-                width: 100%;
-                justify-content: flex-start;
-            }
+        .link-row input:focus { outline: none; border-color: var(--border2); }
+        .link-row .inp-name { width: 110px; flex-shrink: 0; }
+        .link-row .inp-url { flex: 1; font-family: var(--font-mono); font-size: 12px; }
 
-            .modal-content {
-                margin: 0;
-                border-radius: 0;
-                min-height: 100vh;
-            }
+        .btn-rm-link {
+            width: 28px;
+            height: 28px;
+            background: var(--red-dim);
+            border: 1px solid var(--red-border);
+            border-radius: 4px;
+            color: var(--red);
+            font-size: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-ui);
+            transition: opacity 0.15s;
+        }
 
-            .table-container {
-                border-radius: 0;
-            }
+        .btn-rm-link:hover { opacity: 0.75; }
 
-            th, td {
-                padding: 8px;
-                font-size: 13px;
-            }
+        .links-foot {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+        }
 
-            .login-box {
-                padding: 30px 20px;
-            }
+        .btn-add-lrow {
+            padding: 7px 14px;
+            background: transparent;
+            border: 1px solid var(--border2);
+            border-radius: 5px;
+            color: var(--text-dim);
+            font-size: 12px;
+            font-family: var(--font-ui);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-add-lrow:hover {
+            border-color: var(--blue-border);
+            color: var(--blue);
+            background: var(--blue-dim);
+        }
+
+        /* ─── OUT OF RANGE ─── */
+        .out-range {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-muted);
+        }
+
+        .out-range .label {
+            font-size: 13px;
+            margin-top: 6px;
         }
     </style>
 </head>
 <body>
-    <!-- LOGIN SCREEN -->
-    <div class="login-container" id="loginScreen">
-        <div class="login-box">
-            <h1>DSA Task Tracker</h1>
-            <input type="text" id="uidInput" placeholder="Enter User ID" autocomplete="off">
-            <input type="password" id="passwordInput" placeholder="Enter Password" autocomplete="off">
-            <button onclick="app.login()">Login</button>
-        </div>
-    </div>
 
-    <!-- MAIN APP -->
-    <div class="app-container" id="appContainer">
-        <!-- HEADER -->
-        <div class="app-header">
+<!-- ── LOGIN ── -->
+<div class="login-wrap" id="loginScreen">
+    <div class="login-box">
+        <div class="login-logo">
+            <div class="login-logo-mark">Δ</div>
             <h1>DSA Task Tracker</h1>
-            <div class="header-controls">
-                <select id="yearSelect" onchange="app.changeYear()"></select>
-                <select id="monthSelect" onchange="app.changeMonth()"></select>
-                <button class="btn-logout" onclick="app.logout()">Logout</button>
+        </div>
+        <div class="field-label">User ID</div>
+        <input type="text" id="uidInput" placeholder="Enter user ID" autocomplete="off">
+        <div class="field-label">Password</div>
+        <input type="password" id="pwInput" placeholder="Enter password" autocomplete="off"
+               onkeydown="if(event.key==='Enter') app.login()">
+        <button class="btn-login" onclick="app.login()">Log In</button>
+    </div>
+</div>
+
+<!-- ── APP ── -->
+<div class="app-wrap" id="appWrap">
+    <div class="app-inner">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="topbar-logo">
+                <div class="topbar-logo-mark">Δ</div>
+                <span>DSA Task Tracker</span>
+            </div>
+            <button class="btn-logout" onclick="app.logout()">Log out</button>
+        </div>
+
+        <!-- Date nav -->
+        <div class="date-nav-wrap">
+            <button class="btn-daynav" onclick="app.prevDay()">‹</button>
+            <div class="date-center">
+                <div class="date-primary" id="datePrimary"></div>
+                <div class="date-pills">
+                    <span class="date-pill pill-day" id="pillDay"></span>
+                    <span class="date-pill pill-qs" id="pillQs"></span>
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <input type="date" class="date-picker" id="datePicker" onchange="app.onDatePick()">
+                <button class="btn-daynav" onclick="app.nextDay()">›</button>
             </div>
         </div>
 
-        <!-- ADD PROBLEM BUTTON -->
-        <div class="add-problem-section">
-            <button class="btn-add" onclick="app.addProblem()">+ Add Problem</button>
-        </div>
+        <!-- Progress bar -->
+        <div class="progress-row" id="progressDots"></div>
 
-        <!-- TABLE -->
-        <div class="table-container">
+        <!-- Table -->
+        <div class="table-wrap" id="tableWrap">
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 60px;">S.No.</th>
-                        <th style="width: 25%;">Title</th>
-                        <th style="width: 20%;">GitHub Link</th>
-                        <th style="width: 15%;">Type</th>
-                        <th style="width: 15%;">Platform</th>
-                        <th style="width: 140px;">Revision</th>
-                        <th style="width: 100px;">Solutions</th>
-                        <th style="width: 80px;">Delete</th>
+                        <th style="width:64px;text-align:center">#</th>
+                        <th>Problem</th>
+                        <th style="width:260px">Links</th>
+                        <th style="width:120px">Revision</th>
+                        <th style="width:150px">Solutions</th>
                     </tr>
                 </thead>
-                <tbody id="problemTableBody">
-                    <!-- Problems will be inserted here -->
-                </tbody>
+                <tbody id="tbody"></tbody>
             </table>
         </div>
-    </div>
 
-    <!-- SOLUTIONS MODAL -->
-    <div class="modal" id="solutionsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Solutions</h2>
-                <button class="btn-close" onclick="app.closeSolutionsModal()">&times;</button>
-            </div>
-            <div class="modal-body" id="solutionsContainer">
-                <!-- Solutions will be inserted here -->
-            </div>
-            <div class="modal-footer">
-                <button class="btn-add-solution" onclick="app.addSolutionBlock()">+ Add Solution</button>
-                <button class="btn-save-solutions" onclick="app.saveSolutions()">Save All Solutions</button>
-            </div>
+    </div>
+</div>
+
+<!-- ── SOLUTIONS MODAL ── -->
+<div class="modal-overlay" id="solModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <h2 id="solModalTitle">Solutions</h2>
+            <button class="btn-close" onclick="app.closeSolModal()">×</button>
+        </div>
+        <div class="sol-tabs" id="solTabs"></div>
+        <div class="sol-body" id="solBody"></div>
+        <div class="sol-foot">
+            <button class="btn-remove-sol" id="btnRemoveSol" onclick="app.removeActiveSol()">Remove approach</button>
+            <button class="btn-save" onclick="app.saveSol()">Save</button>
         </div>
     </div>
-
-    <!-- FIREBASE SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-    <script>
-        // ===== FIREBASE CONFIGURATION =====
-        // Replace with your Firebase project config
-        const firebaseConfig = {
-            apiKey: "AIzaSyBcvmfQr49-CUO1DVq1y91jyYZbgEZOD4E",
-            authDomain: "pro-dsa-tracker.firebaseapp.com",
-            projectId: "pro-dsa-tracker",
-            storageBucket: "pro-dsa-tracker.firebasestorage.app",
-            messagingSenderId: "777367986934",
-            appId: "1:777367986934:web:1d08ee8bbd66d12a6782d7",
-            measurementId: "G-KJ2RBR7ESV"
-        };
-
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // ===== APPLICATION STATE =====
-        const app = {
-            // Current user session
-            userKey: null,
-            selectedYear: null,
-            selectedMonth: null,
-
-            // Current problem being edited in solutions modal
-            currentProblemId: null,
-
-            // Cache of current month's problems
-            problems: [],
-
-            // ===== AUTHENTICATION & INITIALIZATION =====
-
-            /**
-             * Derive a stable document key from UID + password
-             * Using simple hash for namespace isolation
-             */
-            deriveUserKey(uid, password) {
-                const combined = `${uid}:${password}`;
-                let hash = 0;
-                for (let i = 0; i < combined.length; i++) {
-                    const char = combined.charCodeAt(i);
-                    hash = ((hash << 5) - hash) + char;
-                    hash = hash & hash; // Convert to 32-bit integer
-                }
-                // Return positive hash as string
-                return Math.abs(hash).toString(36);
-            },
-
-            /**
-             * Login handler - fake auth using namespace derivation
-             */
-            async login() {
-                const uid = document.getElementById('uidInput').value.trim();
-                const password = document.getElementById('passwordInput').value.trim();
-
-                if (!uid || !password) {
-                    alert('Please enter both User ID and Password');
-                    return;
-                }
-
-                // Derive user key
-                this.userKey = this.deriveUserKey(uid, password);
-
-                // Set default year/month to current date
-                const now = new Date();
-                this.selectedYear = now.getFullYear();
-                this.selectedMonth = now.getMonth(); // 0-indexed
-
-                // Save session to localStorage
-                localStorage.setItem('dsa_userKey', this.userKey);
-                localStorage.setItem('dsa_selectedYear', this.selectedYear);
-                localStorage.setItem('dsa_selectedMonth', this.selectedMonth);
-
-                // Initialize UI
-                this.initializeApp();
-            },
-
-            /**
-             * Logout handler
-             */
-            logout() {
-                localStorage.removeItem('dsa_userKey');
-                localStorage.removeItem('dsa_selectedYear');
-                localStorage.removeItem('dsa_selectedMonth');
-                
-                this.userKey = null;
-                this.selectedYear = null;
-                this.selectedMonth = null;
-                this.problems = [];
-
-                document.getElementById('loginScreen').style.display = 'flex';
-                document.getElementById('appContainer').classList.remove('active');
-            },
-
-            /**
-             * Check for existing session on page load
-             */
-            async checkSession() {
-                const userKey = localStorage.getItem('dsa_userKey');
-                const year = localStorage.getItem('dsa_selectedYear');
-                const month = localStorage.getItem('dsa_selectedMonth');
-
-                if (userKey && year && month) {
-                    this.userKey = userKey;
-                    this.selectedYear = parseInt(year);
-                    this.selectedMonth = parseInt(month);
-                    this.initializeApp();
-                }
-            },
-
-            /**
-             * Initialize app UI after login
-             */
-            async initializeApp() {
-                // Hide login, show app
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('appContainer').classList.add('active');
-
-                // Populate year/month dropdowns
-                this.populateYearSelect();
-                this.populateMonthSelect();
-
-                // Load problems for current year/month
-                await this.loadProblems();
-            },
-
-            /**
-             * Populate year selector (2020-2035)
-             */
-            populateYearSelect() {
-                const select = document.getElementById('yearSelect');
-                select.innerHTML = '';
-                
-                for (let year = 2020; year <= 2035; year++) {
-                    const option = document.createElement('option');
-                    option.value = year;
-                    option.textContent = year;
-                    if (year === this.selectedYear) {
-                        option.selected = true;
-                    }
-                    select.appendChild(option);
-                }
-            },
-
-            /**
-             * Populate month selector
-             */
-            populateMonthSelect() {
-                const months = [
-                    'January', 'February', 'March', 'April', 'May', 'June',
-                    'July', 'August', 'September', 'October', 'November', 'December'
-                ];
-                
-                const select = document.getElementById('monthSelect');
-                select.innerHTML = '';
-                
-                months.forEach((month, index) => {
-                    const option = document.createElement('option');
-                    option.value = index;
-                    option.textContent = month;
-                    if (index === this.selectedMonth) {
-                        option.selected = true;
-                    }
-                    select.appendChild(option);
-                });
-            },
-
-            /**
-             * Year change handler
-             */
-            async changeYear() {
-                const newYear = parseInt(document.getElementById('yearSelect').value);
-                this.selectedYear = newYear;
-                localStorage.setItem('dsa_selectedYear', newYear);
-                await this.loadProblems();
-            },
-
-            /**
-             * Month change handler
-             */
-            async changeMonth() {
-                const newMonth = parseInt(document.getElementById('monthSelect').value);
-                this.selectedMonth = newMonth;
-                localStorage.setItem('dsa_selectedMonth', newMonth);
-                await this.loadProblems();
-            },
-
-            // ===== FIRESTORE OPERATIONS =====
-
-            /**
-             * Get Firestore document reference for current year/month
-             */
-            getDocRef() {
-                return db.collection('users')
-                    .doc(this.userKey)
-                    .collection('years')
-                    .doc(this.selectedYear.toString())
-                    .collection('months')
-                    .doc(this.selectedMonth.toString());
-            },
-
-            /**
-             * Load problems from Firestore
-             * Defensive: handle missing document, missing fields
-             */
-            async loadProblems() {
-                try {
-                    const docRef = this.getDocRef();
-                    const doc = await docRef.get();
-
-                    if (doc.exists) {
-                        const data = doc.data();
-                        // Defensive: ensure problems array exists
-                        this.problems = Array.isArray(data.problems) ? data.problems : [];
-                    } else {
-                        // Document doesn't exist yet - initialize empty
-                        this.problems = [];
-                    }
-
-                    this.renderProblems();
-                } catch (error) {
-                    console.error('Error loading problems:', error);
-                    alert('Failed to load problems. Please check your Firebase configuration.');
-                    this.problems = [];
-                    this.renderProblems();
-                }
-            },
-
-            /**
-             * Save problems to Firestore
-             * Defensive: create document if it doesn't exist
-             */
-            async saveProblems() {
-                try {
-                    const docRef = this.getDocRef();
-                    await docRef.set({
-                        problems: this.problems,
-                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true }); // merge: true to avoid overwriting other fields
-                } catch (error) {
-                    console.error('Error saving problems:', error);
-                    alert('Failed to save. Please try again.');
-                }
-            },
-
-            // ===== PROBLEM MANAGEMENT =====
-
-            /**
-             * Add a new problem
-             */
-            async addProblem() {
-                const newProblem = {
-                    id: this.generateId(),
-                    title: '',
-                    githubLink: '',
-                    type: '',
-                    platform: '',
-                    revision: 0,
-                    solutions: [] // Array of solution objects
-                };
-
-                this.problems.push(newProblem);
-                await this.saveProblems();
-                this.renderProblems();
-            },
-
-            /**
-             * Delete a problem
-             */
-            async deleteProblem(problemId) {
-                if (!confirm('Are you sure you want to delete this problem?')) {
-                    return;
-                }
-
-                this.problems = this.problems.filter(p => p.id !== problemId);
-                await this.saveProblems();
-                this.renderProblems();
-            },
-
-            /**
-             * Update a problem field
-             */
-            async updateProblem(problemId, field, value) {
-                const problem = this.problems.find(p => p.id === problemId);
-                if (problem) {
-                    problem[field] = value;
-                    await this.saveProblems();
-                }
-            },
-
-            /**
-             * Set revision count for a problem
-             */
-            async setRevision(problemId, count) {
-                const problem = this.problems.find(p => p.id === problemId);
-                if (problem) {
-                    // Toggle behavior: if clicking the same filled bubble, decrease
-                    if (problem.revision === count) {
-                        problem.revision = count - 1;
-                    } else {
-                        problem.revision = count;
-                    }
-                    await this.saveProblems();
-                    this.renderProblems();
-                }
-            },
-
-            /**
-             * Generate unique ID for problems
-             */
-            generateId() {
-                return Date.now().toString(36) + Math.random().toString(36).substr(2);
-            },
-
-            // ===== RENDERING =====
-
-            /**
-             * Render all problems to table
-             */
-            renderProblems() {
-                const tbody = document.getElementById('problemTableBody');
-                tbody.innerHTML = '';
-
-                if (this.problems.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="8">
-                                <div class="empty-state">
-                                    <h3>No problems yet</h3>
-                                    <p>Click "Add Problem" to get started</p>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-
-                this.problems.forEach((problem, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td>
-                            <div class="editable" data-id="${problem.id}" data-field="title">
-                                ${this.escapeHtml(problem.title || '')}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="editable" data-id="${problem.id}" data-field="githubLink">
-                                ${this.escapeHtml(problem.githubLink || '')}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="editable" data-id="${problem.id}" data-field="type">
-                                ${this.escapeHtml(problem.type || '')}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="editable" data-id="${problem.id}" data-field="platform">
-                                ${this.escapeHtml(problem.platform || '')}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="revision-bubbles">
-                                ${this.renderRevisionBubbles(problem.id, problem.revision || 0)}
-                            </div>
-                        </td>
-                        <td>
-                            <button class="btn-solutions ${problem.solutions && problem.solutions.length > 0 ? 'has-solutions' : ''}" 
-                                    onclick="app.openSolutionsModal('${problem.id}')">
-                                Solutions ${problem.solutions && problem.solutions.length > 0 ? `(${problem.solutions.length})` : ''}
-                            </button>
-                        </td>
-                        <td>
-                            <button class="btn-delete" onclick="app.deleteProblem('${problem.id}')">Delete</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-
-                // Attach editable cell listeners
-                this.attachEditableListeners();
-            },
-
-            /**
-             * Render revision bubbles (1-5)
-             */
-            renderRevisionBubbles(problemId, currentRevision) {
-                let html = '';
-                for (let i = 1; i <= 5; i++) {
-                    const filled = i <= currentRevision ? 'filled' : '';
-                    html += `<div class="bubble ${filled}" onclick="app.setRevision('${problemId}', ${i})"></div>`;
-                }
-                return html;
-            },
-
-            /**
-             * Escape HTML to prevent XSS
-             */
-            escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            },
-
-            // ===== EDITABLE CELLS =====
-
-            /**
-             * Attach click listeners to editable cells
-             */
-            attachEditableListeners() {
-                document.querySelectorAll('.editable').forEach(cell => {
-                    cell.addEventListener('click', (e) => {
-                        if (!cell.classList.contains('editing')) {
-                            this.makeEditable(cell);
-                        }
-                    });
-                });
-            },
-
-            /**
-             * Make a cell editable
-             */
-            makeEditable(cell) {
-                const currentValue = cell.textContent.trim();
-                const problemId = cell.dataset.id;
-                const field = cell.dataset.field;
-
-                cell.classList.add('editing');
-                
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.value = currentValue;
-                
-                cell.textContent = '';
-                cell.appendChild(input);
-                input.focus();
-                input.select();
-
-                // Save on Enter
-                input.addEventListener('keydown', async (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const newValue = input.value.trim();
-                        await this.updateProblem(problemId, field, newValue);
-                        this.renderProblems();
-                    } else if (e.key === 'Escape') {
-                        this.renderProblems();
-                    }
-                });
-
-                // Save on blur
-                input.addEventListener('blur', async () => {
-                    const newValue = input.value.trim();
-                    await this.updateProblem(problemId, field, newValue);
-                    this.renderProblems();
-                });
-            },
-
-            // ===== SOLUTIONS MODAL =====
-
-            /**
-             * Open solutions modal for a problem
-             */
-            openSolutionsModal(problemId) {
-                const problem = this.problems.find(p => p.id === problemId);
-                if (!problem) return;
-
-                this.currentProblemId = problemId;
-
-                // Defensive: ensure solutions array exists
-                if (!Array.isArray(problem.solutions)) {
-                    problem.solutions = [];
-                }
-
-                // If no solutions exist, add one empty solution
-                if (problem.solutions.length === 0) {
-                    problem.solutions.push(this.createEmptySolution());
-                }
-
-                // Update modal title
-                document.getElementById('modalTitle').textContent = 
-                    `Solutions - ${problem.title || 'Untitled Problem'}`;
-
-                // Render solutions
-                this.renderSolutions(problem.solutions);
-
-                // Show modal
-                document.getElementById('solutionsModal').classList.add('active');
-            },
-
-            /**
-             * Close solutions modal
-             */
-            closeSolutionsModal() {
-                document.getElementById('solutionsModal').classList.remove('active');
-                this.currentProblemId = null;
-            },
-
-            /**
-             * Create empty solution object
-             */
-            createEmptySolution() {
-                return {
-                    id: this.generateId(),
-                    explanation: '',
-                    code: '',
-                    timeComplexity: '',
-                    spaceComplexity: ''
-                };
-            },
-
-            /**
-             * Render solutions in modal
-             */
-            renderSolutions(solutions) {
-                const container = document.getElementById('solutionsContainer');
-                container.innerHTML = '';
-
-                solutions.forEach((solution, index) => {
-                    const block = document.createElement('div');
-                    block.className = 'solution-block';
-                    block.innerHTML = `
-                        <div class="solution-header">
-                            <h3>Solution ${index + 1}</h3>
-                            ${solutions.length > 1 ? 
-                                `<button class="btn-remove-solution" onclick="app.removeSolution('${solution.id}')">Remove</button>` 
-                                : ''}
-                        </div>
-                        
-                        <div class="solution-field">
-                            <label>Explanation</label>
-                            <textarea data-solution-id="${solution.id}" data-field="explanation">${this.escapeHtml(solution.explanation || '')}</textarea>
-                        </div>
-
-                        <div class="solution-field">
-                            <label>Code</label>
-                            <textarea class="code-area" data-solution-id="${solution.id}" data-field="code">${this.escapeHtml(solution.code || '')}</textarea>
-                        </div>
-
-                        <div class="solution-field">
-                            <label>Time Complexity</label>
-                            <input type="text" data-solution-id="${solution.id}" data-field="timeComplexity" value="${this.escapeHtml(solution.timeComplexity || '')}">
-                        </div>
-
-                        <div class="solution-field">
-                            <label>Space Complexity</label>
-                            <input type="text" data-solution-id="${solution.id}" data-field="spaceComplexity" value="${this.escapeHtml(solution.spaceComplexity || '')}">
-                        </div>
-                    `;
-                    container.appendChild(block);
-                });
-            },
-
-            /**
-             * Add new solution block
-             */
-            addSolutionBlock() {
-                const problem = this.problems.find(p => p.id === this.currentProblemId);
-                if (!problem) return;
-
-                // Defensive: ensure solutions array exists
-                if (!Array.isArray(problem.solutions)) {
-                    problem.solutions = [];
-                }
-
-                problem.solutions.push(this.createEmptySolution());
-                this.renderSolutions(problem.solutions);
-            },
-
-            /**
-             * Remove a solution
-             */
-            removeSolution(solutionId) {
-                const problem = this.problems.find(p => p.id === this.currentProblemId);
-                if (!problem) return;
-
-                problem.solutions = problem.solutions.filter(s => s.id !== solutionId);
-                
-                // Ensure at least one solution remains
-                if (problem.solutions.length === 0) {
-                    problem.solutions.push(this.createEmptySolution());
-                }
-
-                this.renderSolutions(problem.solutions);
-            },
-
-            /**
-             * Save all solutions
-             */
-            async saveSolutions() {
-                const problem = this.problems.find(p => p.id === this.currentProblemId);
-                if (!problem) return;
-
-                // Collect data from all inputs/textareas
-                const container = document.getElementById('solutionsContainer');
-                const inputs = container.querySelectorAll('textarea, input');
-
-                inputs.forEach(input => {
-                    const solutionId = input.dataset.solutionId;
-                    const field = input.dataset.field;
-                    const value = input.value;
-
-                    const solution = problem.solutions.find(s => s.id === solutionId);
-                    if (solution) {
-                        solution[field] = value;
-                    }
-                });
-
-                await this.saveProblems();
-                this.closeSolutionsModal();
-                this.renderProblems(); // Update button state
+</div>
+
+<!-- ── LINKS MODAL ── -->
+<div class="modal-overlay" id="linksModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <h2 id="linksModalTitle">Links</h2>
+            <button class="btn-close" onclick="app.closeLinksModal()">×</button>
+        </div>
+        <div class="links-body" id="linksBody"></div>
+        <div class="links-foot">
+            <button class="btn-add-lrow" onclick="app.addLinkRow()">+ Add link</button>
+            <button class="btn-save" onclick="app.saveLinks()">Save links</button>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+    apiKey: "AIzaSyBcvmfQr49-CUO1DVq1y91jyYZbgEZOD4E",
+    authDomain: "pro-dsa-tracker.firebaseapp.com",
+    projectId: "pro-dsa-tracker",
+    storageBucket: "pro-dsa-tracker.firebasestorage.app",
+    messagingSenderId: "777367986934",
+    appId: "1:777367986934:web:1d08ee8bbd66d12a6782d7"
+});
+const db = firebase.firestore();
+
+// Challenge: March 26 2026 → March 26 2027 (Day 1 to Day 366)
+const START = new Date(2026, 2, 26); // local time
+
+const app = {
+    userKey: null,
+    date: null,           // current Date
+    problems: [],         // always length 5
+    activeProbId: null,   // for solutions modal
+    activeSolIdx: 0,
+    linksProbId: null,    // for links modal
+
+    /* ── Auth ── */
+    hash(s) {
+        let h = 0;
+        for (let i = 0; i < s.length; i++) { h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; }
+        return Math.abs(h).toString(36);
+    },
+
+    async login() {
+        const uid = document.getElementById('uidInput').value.trim();
+        const pw  = document.getElementById('pwInput').value.trim();
+        if (!uid || !pw) { alert('Fill both fields'); return; }
+        this.userKey = this.hash(uid + ':' + pw);
+        const saved = localStorage.getItem('dsa_date');
+        this.date = saved ? this.parseDate(saved) : new Date(START);
+        localStorage.setItem('dsa_userKey', this.userKey);
+        this.boot();
+    },
+
+    logout() {
+        localStorage.removeItem('dsa_userKey');
+        localStorage.removeItem('dsa_date');
+        this.userKey = null;
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('appWrap').classList.remove('active');
+    },
+
+    async checkSession() {
+        const k = localStorage.getItem('dsa_userKey');
+        if (!k) return;
+        this.userKey = k;
+        const s = localStorage.getItem('dsa_date');
+        this.date = s ? this.parseDate(s) : new Date(START);
+        this.boot();
+    },
+
+    boot() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appWrap').classList.add('active');
+        this.loadDay();
+    },
+
+    /* ── Date utils ── */
+    fmtDate(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    },
+
+    parseDate(s) {
+        const [y, m, d] = s.split('-').map(Number);
+        return new Date(y, m - 1, d);
+    },
+
+    dayIndex(d) {
+        const ms = new Date(d.getFullYear(), d.getMonth(), d.getDate()) - START;
+        return Math.round(ms / 86400000); // 0-indexed; Day 1 = index 0
+    },
+
+    prevDay() { this.shiftDay(-1); },
+    nextDay() { this.shiftDay(+1); },
+    shiftDay(n) {
+        const d = new Date(this.date);
+        d.setDate(d.getDate() + n);
+        this.date = d;
+        this.persistDate();
+        this.loadDay();
+    },
+
+    onDatePick() {
+        const v = document.getElementById('datePicker').value;
+        if (v) { this.date = this.parseDate(v); this.persistDate(); this.loadDay(); }
+    },
+
+    persistDate() { localStorage.setItem('dsa_date', this.fmtDate(this.date)); },
+
+    /* ── Firestore ── */
+    docRef() {
+        return db.collection('users').doc(this.userKey).collection('days').doc(this.fmtDate(this.date));
+    },
+
+    async loadDay() {
+        try {
+            const snap = await this.docRef().get();
+            if (snap.exists) {
+                const data = snap.data();
+                this.problems = Array.isArray(data.problems) ? data.problems : this.blankDay();
+                // Ensure exactly 5, preserve fixed IDs
+                while (this.problems.length < 5) this.problems.push(this.blankProb(this.problems.length));
+                this.problems = this.problems.slice(0, 5);
+            } else {
+                this.problems = this.blankDay();
             }
-        };
+        } catch (e) {
+            console.error(e);
+            this.problems = this.blankDay();
+        }
+        this.updateHeader();
+        this.render();
+    },
 
-        // ===== PAGE LOAD =====
-        window.addEventListener('DOMContentLoaded', () => {
-            app.checkSession();
+    async save() {
+        try {
+            await this.docRef().set({
+                problems: this.problems,
+                ts: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+        } catch (e) {
+            console.error(e);
+            alert('Save failed.');
+        }
+    },
+
+    blankDay() { return [0,1,2,3,4].map(i => this.blankProb(i)); },
+    blankProb(i) { return { id: `q${i}`, title: '', links: [], revision: 0, solutions: [] }; },
+
+    /* ── Header ── */
+    updateHeader() {
+        const idx = this.dayIndex(this.date);
+        const inRange = idx >= 0 && idx < 366;
+
+        const dateStr = this.date.toLocaleDateString('en-IN', {
+            weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'
+        });
+        document.getElementById('datePrimary').textContent = dateStr;
+        document.getElementById('datePicker').value = this.fmtDate(this.date);
+
+        if (inRange) {
+            const dayNum = idx + 1;
+            const q1 = idx * 5 + 1, q5 = idx * 5 + 5;
+            document.getElementById('pillDay').textContent = `Day ${dayNum} / 366`;
+            document.getElementById('pillQs').textContent  = `Q${q1} – Q${q5}`;
+        } else {
+            document.getElementById('pillDay').textContent = idx < 0 ? 'Before start' : 'After end';
+            document.getElementById('pillQs').textContent  = '—';
+        }
+
+        // Progress dots
+        const dots = document.getElementById('progressDots');
+        dots.innerHTML = '';
+        this.problems.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'progress-dot' + (p.title && p.title.trim() ? ' done' : '');
+            dots.appendChild(div);
+        });
+    },
+
+    /* ── Render table ── */
+    render() {
+        const tbody = document.getElementById('tbody');
+        tbody.innerHTML = '';
+        const idx = this.dayIndex(this.date);
+        const inRange = idx >= 0 && idx < 366;
+
+        this.problems.forEach((p, i) => {
+            const gNum  = inRange ? idx * 5 + i + 1 : '—';
+            const hasSol = p.solutions && p.solutions.length > 0;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="q-cell">
+                    <div class="q-global">${inRange ? 'Q' + gNum : '—'}</div>
+                    <div class="q-local">#${i + 1}</div>
+                </td>
+                <td>
+                    <div class="editable-cell" data-id="${p.id}" data-field="title">
+                        ${p.title ? this.esc(p.title) : '<span class="title-placeholder">Untitled…</span>'}
+                    </div>
+                </td>
+                <td>
+                    <div class="links-cell" id="lc-${p.id}">
+                        ${this.renderLinkChips(p)}
+                        <button class="btn-add-link" onclick="app.openLinksModal('${p.id}')">
+                            ${p.links && p.links.length ? '✎ edit' : '+ links'}
+                        </button>
+                    </div>
+                </td>
+                <td>
+                    <div class="bubbles">${this.renderBubbles(p.id, p.revision || 0)}</div>
+                </td>
+                <td>
+                    <button class="btn-solutions ${hasSol ? 'has-solutions' : ''}"
+                            onclick="app.openSolModal('${p.id}')">
+                        ${hasSol ? `Solutions (${p.solutions.length})` : 'Solutions'}
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
         });
 
-        // ===== KEYBOARD SHORTCUTS =====
-        window.addEventListener('keydown', (e) => {
-            // Close modal on Escape
-            if (e.key === 'Escape') {
-                const modal = document.getElementById('solutionsModal');
-                if (modal.classList.contains('active')) {
-                    app.closeSolutionsModal();
-                }
-            }
+        this.bindEditable();
+    },
+
+    renderLinkChips(p) {
+        if (!p.links || !p.links.length) return '';
+        return p.links.map(l =>
+            `<a class="link-chip" href="${this.esc(l.url)}" target="_blank"
+                onclick="event.stopPropagation()">${this.esc(l.name || 'Link')}</a>`
+        ).join('');
+    },
+
+    renderBubbles(id, cur) {
+        return [1,2,3,4,5].map(n =>
+            `<div class="bubble ${n <= cur ? 'on' : ''}" onclick="app.setRev('${id}',${n})"></div>`
+        ).join('');
+    },
+
+    esc(t) {
+        if (!t) return '';
+        const d = document.createElement('div');
+        d.textContent = t;
+        return d.innerHTML;
+    },
+
+    /* ── Editable cells ── */
+    bindEditable() {
+        document.querySelectorAll('.editable-cell').forEach(cell => {
+            cell.addEventListener('click', () => {
+                if (!cell.classList.contains('editing')) this.startEdit(cell);
+            });
         });
-    </script>
+    },
+
+    startEdit(cell) {
+        const raw = this.problems.find(p => p.id === cell.dataset.id)?.[cell.dataset.field] || '';
+        cell.classList.add('editing');
+
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.value = raw;
+        cell.innerHTML = '';
+        cell.appendChild(inp);
+        inp.focus(); inp.select();
+
+        const commit = async () => {
+            const p = this.problems.find(x => x.id === cell.dataset.id);
+            if (p) p[cell.dataset.field] = inp.value.trim();
+            await this.save();
+            this.updateHeader();
+            this.render();
+        };
+
+        inp.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); commit(); }
+            if (e.key === 'Escape') this.render();
+        });
+        inp.addEventListener('blur', commit);
+    },
+
+    /* ── Revision ── */
+    async setRev(id, n) {
+        const p = this.problems.find(x => x.id === id);
+        if (!p) return;
+        p.revision = p.revision === n ? n - 1 : n;
+        await this.save();
+        this.render();
+    },
+
+    /* ── Links modal ── */
+    openLinksModal(id) {
+        const p = this.problems.find(x => x.id === id);
+        if (!p) return;
+        this.linksProbId = id;
+        if (!Array.isArray(p.links)) p.links = [];
+
+        const i = this.problems.indexOf(p);
+        const idx = this.dayIndex(this.date);
+        const gNum = idx >= 0 ? idx * 5 + i + 1 : '—';
+
+        document.getElementById('linksModalTitle').innerHTML =
+            `Links &mdash; <strong>Q${gNum}</strong>`;
+
+        this.renderLinksEditor();
+        document.getElementById('linksModal').classList.add('open');
+    },
+
+    renderLinksEditor() {
+        const p = this.problems.find(x => x.id === this.linksProbId);
+        const body = document.getElementById('linksBody');
+        body.innerHTML = '';
+
+        if (!p || !p.links.length) {
+            body.innerHTML = '<div class="links-empty">No links yet — add one below.</div>';
+        }
+
+        (p ? p.links : []).forEach((l, i) => {
+            const row = document.createElement('div');
+            row.className = 'link-row';
+            row.innerHTML = `
+                <input class="inp-name" type="text" placeholder="Name" value="${this.esc(l.name)}"
+                       data-i="${i}" data-f="name">
+                <input class="inp-url" type="url" placeholder="https://…" value="${this.esc(l.url)}"
+                       data-i="${i}" data-f="url">
+                <button class="btn-rm-link" onclick="app.removeLinkRow(${i})">×</button>
+            `;
+            body.appendChild(row);
+        });
+    },
+
+    collectLinks() {
+        const p = this.problems.find(x => x.id === this.linksProbId);
+        if (!p) return;
+        const map = {};
+        document.querySelectorAll('#linksBody input').forEach(inp => {
+            const i = inp.dataset.i, f = inp.dataset.f;
+            if (i !== undefined) { if (!map[i]) map[i] = {}; map[i][f] = inp.value; }
+        });
+        p.links = Object.values(map).map(x => ({ name: x.name || '', url: x.url || '' }));
+    },
+
+    addLinkRow() {
+        const p = this.problems.find(x => x.id === this.linksProbId);
+        if (!p) return;
+        this.collectLinks();
+        p.links.push({ name: '', url: '' });
+        this.renderLinksEditor();
+        // Focus last name field
+        setTimeout(() => {
+            const inputs = document.querySelectorAll('#linksBody .inp-name');
+            if (inputs.length) inputs[inputs.length - 1].focus();
+        }, 50);
+    },
+
+    removeLinkRow(i) {
+        const p = this.problems.find(x => x.id === this.linksProbId);
+        if (!p) return;
+        this.collectLinks();
+        p.links.splice(i, 1);
+        this.renderLinksEditor();
+    },
+
+    async saveLinks() {
+        this.collectLinks();
+        await this.save();
+        this.closeLinksModal();
+        this.render();
+    },
+
+    closeLinksModal() {
+        document.getElementById('linksModal').classList.remove('open');
+        this.linksProbId = null;
+    },
+
+    /* ── Solutions modal ── */
+    openSolModal(id) {
+        const p = this.problems.find(x => x.id === id);
+        if (!p) return;
+        this.activeProbId = id;
+        this.activeSolIdx = 0;
+        if (!Array.isArray(p.solutions)) p.solutions = [];
+        if (!p.solutions.length) p.solutions.push(this.blankSol());
+
+        const i = this.problems.indexOf(p);
+        const idx = this.dayIndex(this.date);
+        const gNum = idx >= 0 ? idx * 5 + i + 1 : '—';
+        document.getElementById('solModalTitle').innerHTML =
+            `Solutions &mdash; <strong>Q${gNum}: ${this.esc(p.title || 'Untitled')}</strong>`;
+
+        this.renderSolModal(p.solutions);
+        document.getElementById('solModal').classList.add('open');
+    },
+
+    closeSolModal() {
+        document.getElementById('solModal').classList.remove('open');
+        this.activeProbId = null;
+    },
+
+    blankSol() {
+        return { id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+                 explanation: '', code: '', tc: '', sc: '' };
+    },
+
+    renderSolModal(sols) {
+        const tabs = document.getElementById('solTabs');
+        const body = document.getElementById('solBody');
+
+        // Tabs
+        tabs.innerHTML = sols.map((s, i) =>
+            `<div class="sol-tab ${i === this.activeSolIdx ? 'active' : ''}"
+                  onclick="app.switchSol(${i})">Approach ${i + 1}</div>`
+        ).join('') + `<div class="sol-tab-add" onclick="app.addSol()">+ New</div>`;
+
+        // Panels
+        body.innerHTML = sols.map((s, i) => `
+            <div class="sol-panel ${i === this.activeSolIdx ? 'active' : ''}">
+                <div class="sol-grid">
+                    <div class="sol-col">
+                        <div class="sol-col-label">Explanation / Intuition</div>
+                        <textarea data-sid="${s.id}" data-f="explanation">${this.esc(s.explanation || '')}</textarea>
+                    </div>
+                    <div class="sol-col">
+                        <div class="sol-col-label">Code</div>
+                        <textarea class="is-code" data-sid="${s.id}" data-f="code">${this.esc(s.code || '')}</textarea>
+                    </div>
+                </div>
+                <div class="sol-meta">
+                    <div class="sol-meta-field">
+                        <label>Time Complexity</label>
+                        <input type="text" data-sid="${s.id}" data-f="tc"
+                               value="${this.esc(s.tc || '')}" placeholder="e.g. O(n log n)">
+                    </div>
+                    <div class="sol-meta-field">
+                        <label>Space Complexity</label>
+                        <input type="text" data-sid="${s.id}" data-f="sc"
+                               value="${this.esc(s.sc || '')}" placeholder="e.g. O(n)">
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        document.getElementById('btnRemoveSol').disabled = sols.length <= 1;
+    },
+
+    switchSol(i) {
+        const p = this.problems.find(x => x.id === this.activeProbId);
+        if (!p) return;
+        this.collectSolDOM();
+        this.activeSolIdx = i;
+        this.renderSolModal(p.solutions);
+    },
+
+    addSol() {
+        const p = this.problems.find(x => x.id === this.activeProbId);
+        if (!p) return;
+        this.collectSolDOM();
+        p.solutions.push(this.blankSol());
+        this.activeSolIdx = p.solutions.length - 1;
+        this.renderSolModal(p.solutions);
+    },
+
+    removeActiveSol() {
+        const p = this.problems.find(x => x.id === this.activeProbId);
+        if (!p || p.solutions.length <= 1) return;
+        this.collectSolDOM();
+        p.solutions.splice(this.activeSolIdx, 1);
+        this.activeSolIdx = Math.max(0, this.activeSolIdx - 1);
+        this.renderSolModal(p.solutions);
+    },
+
+    collectSolDOM() {
+        const p = this.problems.find(x => x.id === this.activeProbId);
+        if (!p) return;
+        document.querySelectorAll('#solBody [data-sid]').forEach(el => {
+            const sol = p.solutions.find(s => s.id === el.dataset.sid);
+            if (sol) sol[el.dataset.f] = el.value;
+        });
+    },
+
+    async saveSol() {
+        this.collectSolDOM();
+        await this.save();
+        this.closeSolModal();
+        this.render();
+    }
+};
+
+// Keyboard shortcuts
+window.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { app.closeSolModal(); app.closeLinksModal(); }
+});
+
+window.addEventListener('DOMContentLoaded', () => app.checkSession());
+</script>
 </body>
 </html>
